@@ -1,0 +1,891 @@
+import java.text.DecimalFormat;
+import java.util.Scanner;
+import java.util.TreeMap;
+import javax.swing.JOptionPane;
+
+public class Main {
+	
+	public static void main(String[] args) {
+		
+		JOptionPane.showMessageDialog(null,"Welcome to MotorPH!");
+		
+		Scanner scanner = new Scanner(System.in);
+		DecimalFormat df = new DecimalFormat("#,###.00");
+		String userConfirm;
+		
+		// TODO Auto-generated method stub
+		Employee emp = new Employee();
+		//Set All Employee Information
+		emp.setID					("10001");
+		emp.setFullName				("Garcia", "Manuel III");
+		emp.setBirthday				("10/11/1983");
+		emp.setAddress				("Valero Carpark Building Valero Street 1227, Makati City");
+		emp.setPhoneNumber			("966-860-270");		
+		emp.setSSSNumber			("44-4506057-3");
+		emp.setPhilhealthNumber		("820126853951");
+		emp.setTinNumber			("442-605-657-000");
+		emp.setPagibigNumber		("691295330870");
+		emp.setEmploymentStatus		("Regular");
+		emp.setPosition				("Chief Executive Officer");
+		emp.setImmediateSupervisor	("N/A");
+		emp.setBasicSalary			(90000);
+		emp.setRiceSubsidy			(1500);
+		emp.setPhoneAllowance		(2000);
+		emp.setClothingAllowance	(1000);		
+		emp.setHourlyRate			(535.71);
+		
+		//Set Attendance
+		Attendance atnd = new Attendance();
+		atnd.setHoursBreak(1);
+		double totalHoursWorked = 0;		
+		String[][] payrollPeriod = {{"Feb-1" ,"08:01","17:00"},
+									{"Feb-2","08:02","17:00"},
+									{"Feb-3","",""},
+									{"Feb-4","",""},
+									{"Feb-5","08:05","17:00"},
+									{"Feb-6","08:06","17:00"},
+									{"Feb-7","08:07","17:00"},
+									{"Feb-8","08:08","17:00"},
+									{"Feb-9","08:09","17:00"},
+									{"Feb-10","",""},
+									{"Feb-11","",""},
+									{"Feb-12","08:12","17:00"},
+									{"Feb-13","08:13","17:00"},
+									{"Feb-14","08:14","17:00"},
+									{"Feb-15","08:15","17:00"}
+									};
+		
+		//Set Gross Salary
+		Salary salary = new Salary();
+		
+		
+		//Task 7: Use the Correct Data Type
+		UserInput payrollUser = new UserInput();
+        //Validating ID input
+        String qID = payrollUser.validateID(scanner);
+        //Display Employee Information
+        emp.displayInfo();
+
+        
+		System.out.println("\n\nTASK 8: The scheduled payroll for " + emp.getFullName() + " is February 15th "
+							+ "\nPlease type \"Y\" to process the payroll");
+		//Validating the User Confirmation to Proceed to task 8
+		userConfirm = payrollUser.validateConfirmation(scanner);
+
+		
+		// Task 8: Calculate Hours Worked		
+		System.out.println("Processing the Payroll Period: February 1st to 15th, 2024 ");
+		
+		
+		//Calculate the Worked Hours given the Scheduled Period
+		System.out.println("Here are the Calculated Worked Hours given the Scheduled Period");
+		for (int i=0; i<payrollPeriod.length; i++) {
+			for(int j=0; j<payrollPeriod[0].length; j++) {
+				switch (j) {
+					case 0:
+						atnd.setpDate(payrollPeriod[i][j]);
+						break;
+					case 1:
+						atnd.setTimeIn(payrollPeriod[i][j]);
+						break;
+					case 2:
+						atnd.setTimeOut(payrollPeriod[i][j]);
+						break;
+				}			
+			}
+			
+			atnd.setHoursWorked(atnd.CalculateHours(atnd.getTimeIn(), atnd.getTimeOut()));
+			atnd.setMinWorked((atnd.getHoursWorked()%1)*60);
+			
+			if (atnd.getHoursWorked()!= 0) {
+				System.out.println(atnd.getpDate() + " " + atnd.getTimeIn() + "-" + atnd.getTimeOut()
+									+ " = " + (int)atnd.getHoursWorked() + "hrs"
+									+ " " + (int)Math.ceil(atnd.getMinWorked()) + "min");
+				totalHoursWorked += atnd.getHoursWorked();
+				emp.setTotalHoursWorked(totalHoursWorked);
+			}else {
+				System.out.println(atnd.getpDate() + " -------DAY OFF-------" );
+			}			
+		}		
+		//Display the Calculated Worked Hours
+		System.out.println("The Total Worked Hours: " + emp.getTotalHoursWorked());
+		
+		
+		System.out.println("\n\nTASK 9: The next Process is the computation of Gross Salary."
+				+ "\nPlease type \"Y\" to process the payroll");
+		//Validating the User Confirmation to Proceed to task 9
+		userConfirm = payrollUser.validateConfirmation(scanner);
+		
+		
+		//Task 9: Calculate Salary Based on Hours Worked
+		//Calculate the Gross Salary based on the Total Worked hours
+					//Set and Calculate the Total Allowance
+		emp.setTotalAllowance(salary.CalculateTotalAllowance(emp.getRiceSubsidy(),
+															emp.getPhoneAllowance(), 
+															emp.getClothingAllowance()));
+					//Set and Calculate the Gross Salary
+		emp.setGrossSalary(salary.CalculateGross(emp.getTotalHoursWorked(), 
+												emp.getHourlyRate(), 
+												emp.getTotalAllowance()));
+
+		//Display Gross Salary
+		System.out.println(emp.getFullName() + "'s Gross Salary from the Payroll Period: February 1st to 15th, 2024"
+							+ "\nGross Salary: " + df.format(emp.getGrossSalary()));
+		
+		
+		System.out.println("\n\nTASK 10: The next Process is the computation of Net Salary."
+				+ "\nPlease type \"Y\" to process the payroll");
+		//Validating the User Confirmation to Proceed to task 10
+		userConfirm = payrollUser.validateConfirmation(scanner);
+		
+		//Task 10: Apply Government Deductions
+		//Calculate the Net Salary
+		emp.setSssContri(salary.CalculateSSS(emp.getGrossSalary()));
+		emp.setPhilhealthContri(salary.CalculatePhilHealth(emp.getGrossSalary()));
+		emp.setPagibigContri(salary.CalculatePagIbig(emp.getGrossSalary()));
+		
+		emp.setTotalDeductions(salary.CalculateTotalDeductions(emp.getSssContri(), 
+																emp.getPhilhealthContri(), 
+																emp.getPagibigContri()));
+		emp.setWithHTax(salary.CalculateWithHoldingTax(emp.getGrossSalary(), emp.getTotalDeductions()));
+		
+		emp.setNetSalary(salary.CalculateNet(emp.getGrossSalary(), 
+											emp.getTotalDeductions(), 
+											emp.getWithHTax()));
+		
+		//Display Net Salary
+		System.out.println("SSS Contribution: " + df.format(emp.getSssContri())
+						+ "\nPhilhealth Contribution: " + df.format(emp.getPhilhealthContri())
+						+ "\nPagIbig Contribution " + df.format(emp.getPagibigContri())
+						+ "\nTotal Goverment Contribution: " + df.format(emp.getTotalDeductions())						
+						
+						+ "\n\nGross Salary: " + df.format(emp.getGrossSalary())
+						+ "\nTotal Goverment Contribution: " + df.format(emp.getTotalDeductions())
+						+ "\nWith Holding Tax: " + df.format(emp.getWithHTax())
+						
+						+"\nNet Salary: " + df.format(emp.getNetSalary()));
+							
+		scanner.close();
+		
+	}	
+
+	
+}
+
+
+
+
+class UserInput {
+	private String userInput = null;
+	boolean isValid = false;
+	
+	
+	public String validateID(Scanner scanner) {
+		isValid = false;
+		
+		System.out.println("TASK 7: Enter Employee ID: (e.g. 10001)");
+		while(!isValid) {					
+			if (scanner.hasNext()) {
+				userInput = scanner.nextLine();
+				
+				if(userInput.equals(10001)) {
+					isValid = true;
+				} else {
+					System.out.println("Employee with ID: " + userInput + " the Information are Not Available. Please input another Employee ID (e.g. 10001)");
+				}
+			} else {
+				System.out.println("Invalid input. Please enter a valid ID.");
+                scanner.next();
+			}			
+		}
+		
+		return userInput;
+	}
+	
+	public String validateConfirmation(Scanner scanner) {
+		
+		isValid = false;
+		
+		while(!isValid) {					
+			if (scanner.hasNext()) {
+				userInput = scanner.nextLine();
+				
+				if(userInput.equals("Y") || userInput.equals("y")) {
+					isValid = true;
+				} 
+				else if(userInput.equals("N") || userInput.equals("n")) {
+					System.out.println("Thank you! You end the program.");
+					System.exit(0);
+				} else {
+					System.out.println("Invalid input."
+										+ "\nPlease type \"Y\" to process the payroll or type \"N\" to end the program.");
+				}
+				
+			} else {
+				System.out.println("Invalid Input."
+									+ "\nPlease type \"Y\" to process the payroll or type \"N\" to end the program.");
+                scanner.next();
+			}			
+		}
+		
+		return userInput;
+	}
+}
+
+
+class Salary {
+	private double gross, net;
+	private double totalAllowance, totalDeductions;
+	private double sss, philhealth, pagibig, withHoldingTax;
+	
+	
+	public double CalculateGross(double hoursWorked, double hourlyRate, double totalAllowance) {
+		gross = (hoursWorked * hourlyRate) + totalAllowance;
+		return gross;
+	}
+	
+	public double CalculateTotalAllowance(double rice, double phone, double clothing) {
+		totalAllowance = (rice + phone + clothing) / 2;
+		return totalAllowance;
+	}	
+	
+	public double CalculateSSS(double gross) {
+		TreeMap<Double, Double> sssChart = new TreeMap<Double, Double>();
+		sssChart.put(3249.00, 135.00);
+		sssChart.put(3250.00, 157.50);
+		sssChart.put(3750.00, 180.00);
+		sssChart.put(4250.00, 202.50);
+		sssChart.put(4750.00, 225.00);
+		sssChart.put(5250.00, 247.50);
+		sssChart.put(5750.00, 270.00);
+		sssChart.put(6250.00, 292.50);
+		sssChart.put(6750.00,315.00);
+		sssChart.put(7250.00, 337.50);
+		sssChart.put(7750.00, 360.00);
+		sssChart.put(8250.00, 382.50);
+		sssChart.put(8750.00, 405.00);
+		sssChart.put(9250.00, 427.50);
+		sssChart.put(9750.00, 450.00);
+		sssChart.put(10250.00, 472.50);
+		sssChart.put(10750.00, 495.00);
+		sssChart.put(11250.00, 517.50);
+		sssChart.put(11750.00, 540.00);
+		sssChart.put(12250.00, 562.50);
+		sssChart.put(12750.00, 585.00);
+		sssChart.put(13250.00, 607.50);
+		sssChart.put(13750.00, 630.00);
+		sssChart.put(14250.00, 652.50);
+		sssChart.put(14750.00, 675.00);
+		sssChart.put(15250.00, 697.50);
+		sssChart.put(15750.00, 720.00);
+		sssChart.put(16250.00, 742.50);
+		sssChart.put(16750.00, 765.00);
+		sssChart.put(17250.00, 787.50);
+		sssChart.put(17750.00, 810.00);
+		sssChart.put(18250.00, 832.50);
+		sssChart.put(18750.00, 855.00);
+		sssChart.put(19250.00, 877.50);
+		sssChart.put(19750.00, 900.00);
+		sssChart.put(20250.00, 922.50);
+		sssChart.put(20750.00, 945.00);
+		sssChart.put(21250.00, 967.50);
+		sssChart.put(21750.00, 990.00);
+		sssChart.put(22250.00, 1012.50);
+		sssChart.put(22750.00, 1035.00);
+		sssChart.put(23250.00, 1057.50);
+		sssChart.put(23750.00, 1080.00);
+		sssChart.put(24250.00, 1102.50);
+		sssChart.put(24750.00, 1125.00);
+
+		sss =  sssChart.floorEntry(gross).getValue();
+		return sss;
+	}
+	
+	public double CalculatePhilHealth(double gross) {
+		philhealth = (gross * .03)*.5;
+		return philhealth;
+	}
+	
+	public double CalculatePagIbig(double gross) {
+		TreeMap<Double, Double> pagibigChart = new TreeMap<Double, Double>();
+		pagibigChart.put(1500.00, .01);
+		pagibigChart.put(1501.00, .02);
+		
+		pagibig = gross * pagibigChart.floorEntry(gross).getValue();
+		
+		if (pagibig >= 100) {
+			pagibig = 100;
+		}
+		
+		return pagibig;
+	}
+	
+	public double CalculateTotalDeductions(double sssContri, double philhealthContri, double pagibigContri) {
+		totalDeductions = sssContri + philhealthContri + pagibigContri;
+		return totalDeductions;
+	}
+	
+	public double CalculateWithHoldingTax(double gross, double totalDeductions) {
+		Double[] n20832 = {1.00, 0.00, 0.00};
+		Double[] n20833 = {0.20, 20833.00, 0.00};
+		Double[] n33333  = {0.25, 33333.00, 2500.00};
+		Double[] n66667 = {0.30, 66667.00, 10833.00};
+		Double[] n166667 = {0.32, 166667.00, 40833.33};
+		Double[] n666667 = {0.35, 666667.00, 200833.33};
+		
+		TreeMap<Double, Double[]> withHTaxChart = new TreeMap<Double, Double[]>();
+		withHTaxChart.put(20832.00, n20832);
+		withHTaxChart.put(20833.00, n20833);
+		withHTaxChart.put(33333.00, n33333);
+		withHTaxChart.put(66667.00, n66667);
+		withHTaxChart.put(166667.00, n166667);
+		withHTaxChart.put(666667.00, n666667);
+		
+		Double [] taxValue = withHTaxChart.floorEntry(gross).getValue();
+		
+		withHoldingTax = (((gross - totalDeductions) - taxValue[1])* taxValue[0]) + taxValue[2];
+		
+		return withHoldingTax;
+	}
+	
+	public double CalculateNet(double gross, double totalDeductions, double withHtax) {
+		net = gross - (totalDeductions + withHtax);
+		return net;
+	}
+}
+
+
+class Attendance {
+	private String pDate;
+	private String timeIn;
+	private String timeOut;
+	private double hoursInShift, hoursOutShift;
+	private double hoursIn, hoursOut, hoursLate, hoursUT, hoursOT, hoursBreak;
+	private double minIn, minOut, minLate, minUT, minOT;
+	private double minWorked, hoursWorked;
+    
+    public double CalculateHours(String timeIn, String timeOut) {
+    	if (timeIn != "" && timeOut != "") {
+    		hoursIn = Integer.parseInt(timeIn.split(":")[0]);
+            minIn = Integer.parseInt(timeIn.split(":")[1]);
+            hoursOut = Integer.parseInt(timeOut.split(":")[0]);
+            minOut = Integer.parseInt(timeOut.split(":")[1]);
+        	hoursLate = 0;
+            //Check if Late
+            if (hoursIn >= 8 && minIn > 10) {
+                if (hoursIn > 8) {
+                    hoursLate = hoursInShift - hoursIn;
+                }
+                //Convert minLate to hours
+                minLate = minIn/60;
+                //Sum up the Total hours and min of late
+                hoursLate = hoursLate + minLate;
+            }
+            //Calculate the Total Worked Hours
+            hoursWorked = (hoursOut - hoursIn) - (hoursBreak + hoursLate);
+    	} else {
+    		hoursWorked = 0;
+    	}
+    	
+    	return hoursWorked;
+    }
+    
+	public String getpDate() {
+		return pDate;
+	}
+	
+	public void setpDate(String pDate) {
+		this.pDate = pDate;
+	}
+	
+	public String getTimeIn() {
+		return timeIn;
+	}
+	
+	public void setTimeIn(String timeIn) {
+		if (timeIn == null) {
+			timeIn = "0";
+		}
+		this.timeIn = timeIn;
+	}
+	
+	public String getTimeOut() {
+		return timeOut;
+	}
+	
+	public void setTimeOut(String timeOut) {
+		if (timeIn == null) {
+			timeIn = "0";
+		}
+		this.timeOut = timeOut;
+	}
+	
+	public double getHoursInShift() {
+		return hoursInShift;
+	}
+	
+	public void setHoursInShift(double hoursInShift) {
+		this.hoursInShift = hoursInShift;
+	}
+	
+	public double getHoursOutShift() {
+		return hoursOutShift;
+	}
+	
+	public void setHoursOutShift(double hoursOutShift) {
+		this.hoursOutShift = hoursOutShift;
+	}
+	
+	public double getHoursIn() {
+		return hoursIn;
+	}
+	
+	public void setHoursIn(double hoursIn) {
+		this.hoursIn = hoursIn;
+	}
+	
+	public double getHoursOut() {
+		return hoursOut;
+	}
+	
+	public void setHoursOut(double hoursOut) {
+		this.hoursOut = hoursOut;
+	}
+	
+	public double getHoursLate() {
+		return hoursLate;
+	}
+	
+	public void setHoursLate(double hoursLate) {
+		this.hoursLate = hoursLate;
+	}
+	
+	public double getHoursUT() {
+		return hoursUT;
+	}
+
+	public void setHoursUT(double hoursUT) {
+		this.hoursUT = hoursUT;
+	}
+
+	public double getHoursOT() {
+		return hoursOT;
+	}
+
+	public void setHoursOT(double hoursOT) {
+		this.hoursOT = hoursOT;
+	}
+
+	public double getHoursBreak() {
+		return hoursBreak;
+	}
+
+	public void setHoursBreak(double hoursBreak) {
+		this.hoursBreak = hoursBreak;
+	}
+
+	public double getMinIn() {
+		return minIn;
+	}
+
+	public void setMinIn(double minIn) {
+		this.minIn = minIn;
+	}
+
+	public double getMinOut() {
+		return minOut;
+	}
+
+	public void setMinOut(double minOut) {
+		this.minOut = minOut;
+	}
+
+	public double getMinLate() {
+		return minLate;
+	}
+
+	public void setMinLate(double minLate) {
+		this.minLate = minLate;
+	}
+
+	public double getMinUT() {
+		return minUT;
+	}
+
+	public void setMinUT(double minUT) {
+		this.minUT = minUT;
+	}
+
+	public double getMinOT() {
+		return minOT;
+	}
+
+	public void setMinOT(double minOT) {
+		this.minOT = minOT;
+	}
+
+	public double getMinWorked() {
+		return minWorked;
+	}
+
+	public void setMinWorked(double minWorked) {
+		this.minWorked = minWorked;
+	}
+	
+	public double getHoursWorked() {
+		return hoursWorked;
+	}
+	
+	public void setHoursWorked(double hoursWorked) {
+		this.hoursWorked = hoursWorked;
+	}   	
+}
+
+
+class Employee {
+	private String	ID;
+	//Personal Information
+	private String lastName, firstName;
+	private String birthday, address, phoneNumber;
+    
+    //Goverment Information
+	private String sssNumber, philhealthNumber, tinNumber, pagibigNumber;
+    
+    //Employement Information
+	private String employmentStatus, position, immediateSupervisor;
+    
+    //Rates and Allowances
+	private double basicSalary;
+	private double riceSubsidy, phoneAllowance, clothingAllowance;
+	private double grossSemiMonthlyRate, hourlyRate;
+    
+	private double totalHoursWorked, totalAllowance, grossSalary, netSalary;
+	private double sssContri, philhealthContri, pagibigContri;
+	private double totalDeductions, withHTax;
+
+
+	
+
+
+	public void setFullName(String lastName, String firstName) {
+		setLastName(lastName);
+		setFirstName(firstName);
+	}
+	
+	
+	public String getFullName() {
+		return lastName + ", " + firstName;
+	}
+	
+	
+	void displayInfo () {
+		System.out.println("Last Name: " + getLastName() + 
+				"\nFirst Name: " + getFirstName() +
+				"\nBirthday: " + getBirthday() +
+				"\nAddress: " + getAddress() +
+				"\nPhone Number: " + getPhoneNumber() +
+				"\nSSS: " + getSSSNumber() +
+				"\nPhilhealth: " + getPhilhealthNumber() +
+				"\nTIN: " + getTinNumber() +
+				"\nPagibig: " + getPagibigNumber() +
+				"\nStatus: " + getEmploymentStatus() +
+				"\nPosition: " + getPosition() +
+				"\nImmediate Supervisor: " + getImmediateSupervisor() +
+				"\nBasic Salary: " + getBasicSalary() +
+				"\nRice Subsidy: " + getRiceSubsidy() +
+				"\nPhone Allowance: " + getPhoneAllowance() +
+				"\nClothing Allowance: " + getClothingAllowance() +
+				"\nHourly Rate: " + getHourlyRate());
+
+    }
+	
+	
+    public String getID() {
+		return ID;
+	}
+
+
+	public void setID(String newID) {
+		ID = newID;
+	}
+
+
+	public String getLastName() {
+		return lastName;
+	}
+
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+
+	public String getBirthday() {
+		return birthday;
+	}
+
+
+	public void setBirthday(String birthday) {
+		this.birthday = birthday;
+	}
+
+
+	public String getAddress() {
+		return address;
+	}
+
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+
+	public String getSSSNumber() {
+		return sssNumber;
+	}
+
+
+	public void setSSSNumber(String sssNumber) {
+		this.sssNumber = sssNumber;
+	}
+
+
+	public String getPhilhealthNumber() {
+		return philhealthNumber;
+	}
+
+
+	public void setPhilhealthNumber(String philhealthNumber) {
+		this.philhealthNumber = philhealthNumber;
+	}
+
+
+	public String getTinNumber() {
+		return tinNumber;
+	}
+
+
+	public void setTinNumber(String tinNumber) {
+		this.tinNumber = tinNumber;
+	}
+
+
+	public String getPagibigNumber() {
+		return pagibigNumber;
+	}
+
+
+	public void setPagibigNumber(String pagibigNumber) {
+		this.pagibigNumber = pagibigNumber;
+	}
+
+
+	public String getEmploymentStatus() {
+		return employmentStatus;
+	}
+
+
+	public void setEmploymentStatus(String employmentStatus) {
+		this.employmentStatus = employmentStatus;
+	}
+
+
+	public String getPosition() {
+		return position;
+	}
+
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+
+	public String getImmediateSupervisor() {
+		return immediateSupervisor;
+	}
+
+
+	public void setImmediateSupervisor(String immediateSupervisor) {
+		this.immediateSupervisor = immediateSupervisor;
+	}
+
+
+	public double getBasicSalary() {
+		return basicSalary;
+	}
+
+
+	public void setBasicSalary(double basicSalary) {
+		this.basicSalary = basicSalary;
+	}
+
+
+	public double getRiceSubsidy() {
+		return riceSubsidy;
+	}
+
+
+	public void setRiceSubsidy(double riceSubsidy) {
+		this.riceSubsidy = riceSubsidy;
+	}
+
+
+	public double getPhoneAllowance() {
+		return phoneAllowance;
+	}
+
+
+	public void setPhoneAllowance(double phoneAllowance) {
+		this.phoneAllowance = phoneAllowance;
+	}
+
+
+	public double getClothingAllowance() {
+		return clothingAllowance;
+	}
+
+
+	public void setClothingAllowance(double clothingAllowance) {
+		this.clothingAllowance = clothingAllowance;
+	}
+
+
+	public double getGrossSemiMonthlyRate() {
+		return grossSemiMonthlyRate;
+	}
+
+
+	public void setGrossSemiMonthlyRate(double grossSemiMonthlyRate) {
+		this.grossSemiMonthlyRate = grossSemiMonthlyRate;
+	}
+
+
+	public double getHourlyRate() {
+		return hourlyRate;
+	}
+
+
+	public void setHourlyRate(double hourlyRate) {
+		this.hourlyRate = hourlyRate;
+	}	
+	
+	
+	public double getTotalHoursWorked() {
+		return totalHoursWorked;
+	}
+
+
+	public void setTotalHoursWorked(double totalHoursWorked) {
+		this.totalHoursWorked = totalHoursWorked;
+	}
+
+	
+	public double getTotalAllowance() {
+		return totalAllowance;
+	}
+
+
+	public void setTotalAllowance(double totalAllowance) {
+		this.totalAllowance = totalAllowance;
+	}
+	
+	
+	public double getGrossSalary() {
+		return grossSalary;
+	}
+
+
+	public void setGrossSalary(double grossSalary) {
+		this.grossSalary = grossSalary;
+	}
+
+
+	public double getNetSalary() {
+		return netSalary;
+	}
+
+
+	public void setNetSalary(double netSalary) {
+		this.netSalary = netSalary;
+	}
+	
+	
+	public String getSssNumber() {
+		return sssNumber;
+	}
+
+
+	public void setSssNumber(String sssNumber) {
+		this.sssNumber = sssNumber;
+	}
+
+
+	public double getSssContri() {
+		return sssContri;
+	}
+
+
+	public void setSssContri(double sssContri) {
+		this.sssContri = sssContri;
+	}
+
+
+	public double getPhilhealthContri() {
+		return philhealthContri;
+	}
+
+
+	public void setPhilhealthContri(double philhealthContri) {
+		this.philhealthContri = philhealthContri;
+	}
+
+
+	public double getPagibigContri() {
+		return pagibigContri;
+	}
+
+
+	public void setPagibigContri(double pagibigContri) {
+		this.pagibigContri = pagibigContri;
+	}
+
+
+	public double getTotalDeductions() {
+		return totalDeductions;
+	}
+
+
+	public void setTotalDeductions(double totalDeductions) {
+		this.totalDeductions = totalDeductions;
+	}
+
+
+	public double getWithHTax() {
+		return withHTax;
+	}
+
+
+	public void setWithHTax(double withHTax) {
+		this.withHTax = withHTax;
+	}
+}
